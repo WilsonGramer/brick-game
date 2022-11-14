@@ -1,0 +1,13 @@
+body {
+    margin: 0;
+    background-color: black;
+}
+
+canvas {
+    display: block;
+    max-width: 100%;
+    height: 100vh;
+    margin: 0 auto;
+    object-fit: contain;
+    image-rendering: pixelated;
+}
