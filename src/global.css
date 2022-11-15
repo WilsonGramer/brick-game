@@ -3,7 +3,7 @@ body {
     background-color: black;
 }
 
-canvas {
+#game canvas {
     display: block;
     max-width: 100%;
     height: 100vh;
