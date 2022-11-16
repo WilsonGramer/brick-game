@@ -207,7 +207,47 @@ export const Game = (props: { config: GameConfig; onStart: (game: GameState) => 
     const [started, setStarted] = useState(false);
 
     useEffect(() => {
+        const update = () => {
+            const gamepads = navigator.getGamepads();
+
+            for (let gamepadIndex = 0; gamepadIndex < gamepads.length; gamepadIndex++) {
+                const gamepad = gamepads[gamepadIndex];
+
+                if (!gamepad || gamepad.mapping !== "standard") {
+                    continue;
+                }
+
+                for (let buttonIndex = 0; buttonIndex < gamepad.buttons.length; buttonIndex++) {
+                    const button = gamepad.buttons[buttonIndex];
+
+                    if (button.pressed) {
+                        const update = () => {
+                            const gamepads = navigator.getGamepads();
+
+                            if (!gamepads[gamepadIndex]!.buttons[buttonIndex].pressed) {
+                                setStarted(true);
+                                return;
+                            }
+
+                            requestAnimationFrame(update);
+                        };
+
+                        update();
+
+                        return;
+                    }
+                }
+            }
+
+            requestAnimationFrame(update);
+        };
+
+        update();
+    }, []);
+
+    useEffect(() => {
         if (started) {
+            document.documentElement.requestFullscreen({ navigationUI: "hide" });
             runGame(element.current!, props.config, props.onStart);
         }
     }, [started]);
@@ -225,9 +265,7 @@ export const Game = (props: { config: GameConfig; onStart: (game: GameState) => 
                 height: "100vh",
             }}
         >
-            <p style={{ color: "white" }}>Connect a controller and press Start:</p>
-
-            <button onClick={() => setStarted(true)}>Start</button>
+            <p style={{ color: "white" }}>Connect a controller and press any button to start</p>
         </div>
     );
 };
