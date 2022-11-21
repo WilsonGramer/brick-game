@@ -66,7 +66,7 @@ const TitleRoom: engine.Room = async (ctx) => {
     ctx.print(`HIGHSCORE: ${highScore}`);
 
     ctx.effect(async () => {
-        stage = 0;
+        stage = brickType >= 2 ? 4 : 0;
         await wait(60);
     });
 
