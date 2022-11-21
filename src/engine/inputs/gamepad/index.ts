@@ -20,7 +20,7 @@ const gamepadMap = [
     0, // (middle button)
 ];
 
-const gamepadInput: GameInput = {
+const gamepadInput = (): GameInput => ({
     button: async () => {
         for (const gamepad of navigator.getGamepads()) {
             if (!gamepad || gamepad.mapping !== "standard") {
@@ -36,6 +36,6 @@ const gamepadInput: GameInput = {
 
         return 0;
     },
-};
+});
 
 export default gamepadInput;

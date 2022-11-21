@@ -5,6 +5,8 @@ import TitleRoom from "./game";
 import controller from "./assets/controller.svg";
 import "./assets/global.css";
 
+const input = engine.inputs.combined(engine.inputs.gamepad(), engine.inputs.keyboard());
+
 const App = () => {
     const element = useRef<HTMLDivElement>(null);
 
@@ -14,7 +16,7 @@ const App = () => {
         let pressed = false;
 
         const update = async () => {
-            const button = await engine.inputs.gamepad.button();
+            const button = await input.button();
 
             if (pressed && button === 0) {
                 setStarted(true);
@@ -37,7 +39,7 @@ const App = () => {
                 document.documentElement.requestFullscreen({ navigationUI: "hide" });
             }
 
-            engine.backends.ptc.run(TitleRoom, engine.inputs.gamepad, element.current!);
+            engine.backends.ptc.run(TitleRoom, input, element.current!);
         }
     }, [started]);
 
