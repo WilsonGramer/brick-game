@@ -218,7 +218,7 @@ const App = () => {
 
     useEffect(() => {
         if (started) {
-            // document.documentElement.requestFullscreen({ navigationUI: "hide" });
+            document.documentElement.requestFullscreen({ navigationUI: "hide" });
             engine.backends.ptc.run(TitleRoom, engine.inputs.gamepad, element.current!);
         }
     }, [started]);
