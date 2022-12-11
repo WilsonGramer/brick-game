@@ -3,7 +3,7 @@ export * as backends from "./backends";
 
 import { Queue } from "typescript-collections";
 
-export type Room = (ctx: GameContext) => Promise<void>;
+export type Room = (ctx: GameContext) => void;
 
 export interface GameInput {
     button: () => Promise<number>;
@@ -38,8 +38,8 @@ export class Music {
 
 type Event =
     | { type: "update"; render: boolean }
-    | { type: "setRoom"; room: Room; stack: string }
-    | { type: "setState"; index: number; value: any; stack: string };
+    | { type: "setRoom"; room: Room }
+    | { type: "setState"; value: any };
 
 export class GameContext {
     private input: GameInput;
@@ -47,8 +47,7 @@ export class GameContext {
     private renderedGame: RenderedGame;
     private room: Room;
     private events: Queue<Event>;
-    private stateIndex: number;
-    private states: any[];
+    private stateValue: any;
     private effects: (() => Promise<void | (() => Promise<void>)>)[];
     private loops: (() => Promise<void>)[];
     private x: number;
@@ -65,8 +64,7 @@ export class GameContext {
         };
         this.room = room;
         this.events = new Queue();
-        this.stateIndex = 0;
-        this.states = [];
+        this.stateValue = undefined;
         this.effects = [];
         this.loops = [];
         this.x = 0;
@@ -75,30 +73,15 @@ export class GameContext {
         this.bgColor = 1;
     }
 
-    public state<T>(initialValue: T): [T, (newValue: T) => void] {
-        const stateIndex = this.stateIndex;
+    public state<T>(initialValue: T): [() => T, (newValue: T) => void] {
         const update = (newValue: T) => {
             this.enqueueSignificantEvent({
                 type: "setState",
-                index: stateIndex,
                 value: newValue,
-                stack: new Error().stack!,
             });
         };
 
-        this.stateIndex++;
-
-        if (stateIndex < this.states.length) {
-            return [this.states[stateIndex], update];
-        }
-
-        if (stateIndex !== this.states.length) {
-            throw new Error("invalid state");
-        }
-
-        this.states.push(initialValue);
-
-        return [initialValue, update];
+        return [() => this.stateValue ?? initialValue, update];
     }
 
     public effect(func: () => Promise<void | (() => Promise<void>)>) {
@@ -113,7 +96,6 @@ export class GameContext {
         this.enqueueSignificantEvent({
             type: "setRoom",
             room,
-            stack: new Error().stack!,
         });
     }
 
@@ -230,17 +212,16 @@ export class GameContext {
                     shouldRender = true;
                     cleanups = [];
                     this.room = event.room;
-                    this.states = [];
+                    this.stateValue = undefined;
                     break;
                 case "setState":
                     shouldRunEffects = false;
                     shouldRender = true;
-                    this.states[event.index] = event.value;
+                    this.stateValue = event.value;
                     break;
             }
 
             if (shouldRender) {
-                this.stateIndex = 0;
                 this.effects = [];
                 this.loops = [];
                 this.x = 0;
@@ -248,7 +229,7 @@ export class GameContext {
                 this.fgColor = 0;
                 this.bgColor = 1;
 
-                await this.room(this);
+                this.room(this);
                 await this.backend.render(this.renderedGame);
 
                 this.clear();

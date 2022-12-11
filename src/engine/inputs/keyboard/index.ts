@@ -25,7 +25,6 @@ const gamepadInput = (): GameInput => {
     let key: string | undefined;
 
     window.addEventListener("keydown", (event) => {
-        console.warn(event.key);
         key = event.key;
     });
 

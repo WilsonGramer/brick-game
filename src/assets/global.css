@@ -1,8 +1,27 @@
 body {
     margin: 0;
     background-color: black;
+    color: white;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
         Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+}
+
+.game-list {
+    font-size: 18pt;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.game-list a {
+    text-decoration: none;
+}
+
+.game-list a:visited {
+    color: unset;
 }
 
 #game canvas {

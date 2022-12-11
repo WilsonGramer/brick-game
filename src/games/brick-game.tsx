@@ -1,5 +1,6 @@
 import { random, sample } from "lodash";
-import * as engine from "./engine";
+import { Game } from ".";
+import * as engine from "../engine";
 
 const { width, height } = engine.backends.ptc;
 
@@ -22,7 +23,7 @@ let highScore = 0;
 let brickType = 0;
 let newBrickType = 0;
 
-const TitleRoom: engine.Room = async (ctx) => {
+const TitleRoom: engine.Room = (ctx) => {
     ctx.play(new engine.Music(21, true));
     ctx.fg(8);
     ctx.print(new Array(width).fill(characters.brick));
@@ -81,7 +82,7 @@ const TitleRoom: engine.Room = async (ctx) => {
     });
 };
 
-const StartRoom: engine.Room = async (ctx) => {
+const StartRoom: engine.Room = (ctx) => {
     ctx.locate(10, 12);
     ctx.print("HERE WE GO!");
 
@@ -91,7 +92,7 @@ const StartRoom: engine.Room = async (ctx) => {
     });
 };
 
-const NextStageRoom: engine.Room = async (ctx) => {
+const NextStageRoom: engine.Room = (ctx) => {
     ctx.locate(10, 12);
     ctx.print("NEXT STAGE!");
 
@@ -101,9 +102,8 @@ const NextStageRoom: engine.Room = async (ctx) => {
     });
 };
 
-const BricksRoom: engine.Room = async (ctx) => {
-    const [x, setX] = ctx.state(15);
-    const [y, setY] = ctx.state(15);
+const BricksRoom: engine.Room = (ctx) => {
+    const [position, setPosition] = ctx.state({ x: 15, y: 15 });
 
     ctx.play(new engine.Music(27, true));
 
@@ -158,40 +158,40 @@ const BricksRoom: engine.Room = async (ctx) => {
     ctx.locate(0, 22);
     ctx.fg(0);
     ctx.print(`SCORE: ${stage}`);
-    ctx.locate(x, y);
+    ctx.locate(position().x, position().y);
     ctx.fg(13);
     ctx.print(characters.face);
 
     ctx.loop(async () => {
         switch (await ctx.button()) {
             case 1:
-                setY(Math.max(0, y - 1));
+                setPosition({ ...position(), y: Math.max(0, position().y - 1) });
                 await wait(10);
                 break;
             case 2:
-                setY(Math.min(y + 1, height - 1));
+                setPosition({ ...position(), y: Math.min(position().y + 1, height - 1) });
                 await wait(10);
                 break;
             case 4:
-                setX(Math.max(0, x - 1));
+                setPosition({ ...position(), x: Math.max(0, position().x - 1) });
                 await wait(10);
                 break;
             case 8:
-                setX(Math.min(x + 1, width - 1));
+                setPosition({ ...position(), x: Math.min(position().x + 1, width - 1) });
                 await wait(10);
                 break;
             default:
                 break;
         }
 
-        if ((x == 9 || x == 16) && y == 7) {
+        if ((position().x == 9 || position().x == 16) && position().y == 7) {
             const chance = brickType >= 1 ? 5 : 2;
             ctx.setRoom(random(chance) > 0 ? ClearRoom : GameOverRoom);
         }
     });
 };
 
-const ClearRoom: engine.Room = async (ctx) => {
+const ClearRoom: engine.Room = (ctx) => {
     ctx.play(new engine.Music(15, true));
     ctx.locate(12, 12);
     ctx.print("CLEAR!");
@@ -208,7 +208,7 @@ const ClearRoom: engine.Room = async (ctx) => {
     });
 };
 
-const GameOverRoom: engine.Room = async (ctx) => {
+const GameOverRoom: engine.Room = (ctx) => {
     ctx.play(new engine.Music(6, false));
     ctx.locate(12, 12);
     ctx.print("GAME OVER");
@@ -242,7 +242,7 @@ const GameOverRoom: engine.Room = async (ctx) => {
     });
 };
 
-const NewBrickRoom: engine.Room = async (ctx) => {
+const NewBrickRoom: engine.Room = (ctx) => {
     ctx.play(new engine.Music(12, true));
     ctx.locate(6, 10);
     ctx.print("YOU GOT A NEW BRICK!");
@@ -262,7 +262,7 @@ const NewBrickRoom: engine.Room = async (ctx) => {
     });
 };
 
-const HighScoreRoom: engine.Room = async (ctx) => {
+const HighScoreRoom: engine.Room = (ctx) => {
     ctx.play(new engine.Music(12, true));
     ctx.locate(6, 10);
     ctx.print("YOU GOT A HIGH SCORE!");
@@ -279,7 +279,7 @@ const HighScoreRoom: engine.Room = async (ctx) => {
     });
 };
 
-const StoreRoom: engine.Room = async (ctx) => {
+const StoreRoom: engine.Room = (ctx) => {
     ctx.play(new engine.Music(14, true));
     ctx.fg(0);
 
@@ -346,4 +346,4 @@ const StoreRoom: engine.Room = async (ctx) => {
     });
 };
 
-export default TitleRoom;
+export default () => <Game room={TitleRoom} />;
